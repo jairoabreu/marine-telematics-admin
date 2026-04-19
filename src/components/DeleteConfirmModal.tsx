@@ -21,8 +21,8 @@ export default function DeleteConfirmModal({ kit, onClose, onDeleted }: Props) {
         </div>
         <div className="px-6 py-5">
           <p className="text-sm text-gray-600 leading-relaxed mb-1">Tem certeza que deseja excluir o kit</p>
-          <p className="text-sm font-semibold text-gray-900 mb-4">"{kjit.name}"?</p>
-          <p className="text-xs text-gray-400">Esta ação é irreversível. A imagem e todos os dados de mapeamento serão removidos.</p>
+          <p className="text-sm font-semibold text-gray-900 mb-4">"{kit.name}"?</p>
+          <p className="text-xs text-gray-400">Esta aÃ§Ã£o Ã© irreversÃ­vel. A imagem e todos os dados de mapeamento serÃ£o removidos.</p>
           {error && <p className="mt-3 text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
         </div>
         <div className="px-6 pb-5 flex gap-3">
