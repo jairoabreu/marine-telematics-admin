@@ -1,20 +1,27 @@
 // src/components/KitViewerModal.tsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Kit, HotspotComponent, getImageUrl } from '../lib/supabase'
 import { X, Search } from 'lucide-react'
 
 interface Props { kit: Kit; onClose: () => void }
-
-const IMG_W = 2432, IMG_H = 1508
 
 export default function KitViewerModal({ kit, onClose }: Props) {
   const [search, setSearch] = useState('')
   const [pinnedCode, setPinnedCode] = useState<string | null>(null)
   const [hoveredCode, setHoveredCode] = useState<string | null>(null)
   const [zoom, setZoom] = useState(50)
+  const [imgDims, setImgDims] = useState({ w: 2432, h: 1508 })
   const imageUrl = getImageUrl(kit.image_path)
   const hotspots = kit.hotspots ?? []
   const activeCode = pinnedCode ?? hoveredCode
+
+  // Detect natural dimensions of the image so polygon coordinates align correctly
+  useEffect(() => {
+    if (!imageUrl) return
+    const img = new Image()
+    img.onload = () => setImgDims({ w: img.naturalWidth, h: img.naturalHeight })
+    img.src = imageUrl
+  }, [imageUrl])
 
   const filtered = hotspots.filter(c =>
     !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.code.includes(search)
@@ -47,15 +54,16 @@ export default function KitViewerModal({ kit, onClose }: Props) {
                 <span className="text-xs text-gray-400">Zoom</span>
                 <input type="range" min={20} max={150} value={zoom} onChange={e => setZoom(+e.target.value)} className="w-28"/>
                 <span className="text-xs font-mono text-gray-500">{zoom}%</span>
+                <span className="text-xs text-gray-300 ml-4 font-mono">{imgDims.w}×{imgDims.h}</span>
               </div>
               <svg
-                width={IMG_W * zoom / 100}
-                height={IMG_H * zoom / 100}
-                viewBox={`0 0 ${IMG_W} ${IMG_H}`}
+                width={imgDims.w * zoom / 100}
+                height={imgDims.h * zoom / 100}
+                viewBox={`0 0 ${imgDims.w} ${imgDims.h}`}
                 className="block flex-shrink-0"
                 onClick={() => setPinnedCode(null)}
               >
-                <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} preserveAspectRatio="xMidYMid meet"/>
+                <image href={imageUrl} x={0} y={0} width={imgDims.w} height={imgDims.h} preserveAspectRatio="none"/>
                 {hotspots.map(comp => {
                   const isActive = comp.code === activeCode
                   const col = comp.color
@@ -94,7 +102,7 @@ export default function KitViewerModal({ kit, onClose }: Props) {
           </div>
 
           <div className="grid grid-cols-[36px_1fr_32px_32px] px-3 py-1.5 border-b border-gray-100 bg-gray-50">
-            {['CÃ³d.','DescriÃ§Ã£o','Un.','Qtd.'].map((h, i) => (
+            {['Cód.','Descrição','Un.','Qtd.'].map((h, i) => (
               <span key={h} className={`text-[9px] font-bold text-gray-400 uppercase tracking-wider ${i >= 2 ? 'text-center' : ''}`}>{h}</span>
             ))}
           </div>
@@ -138,16 +146,16 @@ export default function KitViewerModal({ kit, onClose }: Props) {
               const comp = hotspots.find(c => c.code === activeCode)
               if (!comp) return null
               return <>
-                <div className="text-[9px] font-mono text-white/30 tracking-widest mb-1">// CÃD. {comp.code}</div>
+                <div className="text-[9px] font-mono text-white/30 tracking-widest mb-1">// CÓD. {comp.code}</div>
                 <div className="text-sm font-semibold text-white mb-2 leading-snug">{comp.name}</div>
                 <div className="flex gap-2 mb-2">
                   <div className="bg-white/8 border border-white/10 rounded px-2 py-1 text-[10px] text-white/40">Unid. <b className="text-white font-mono">{comp.unit}</b></div>
                   <div className="bg-white/8 border border-white/10 rounded px-2 py-1 text-[10px] text-white/40">Qtd. <b className="text-white font-mono">{comp.qty}</b></div>
-                  <div className="bg-white/8 border border-white/10 rounded px-2 py-1 text-[10px] text-white/40">Ãreas <b className="text-white font-mono">{comp.polys.length}</b></div>
+                  <div className="bg-white/8 border border-white/10 rounded px-2 py-1 text-[10px] text-white/40">Áreas <b className="text-white font-mono">{comp.polys.length}</b></div>
                 </div>
                 {comp.desc
                   ? <p className="text-[10px] text-white/50 leading-relaxed">{comp.desc}</p>
-                  : <p className="text-[10px] text-white/20 italic">Sem descriÃ§Ã£o cadastrada.</p>
+                  : <p className="text-[10px] text-white/20 italic">Sem descrição cadastrada.</p>
                 }
               </>
             })() : (
