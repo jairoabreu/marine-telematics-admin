@@ -8,10 +8,10 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-export interface HotspotPoint {
-  x: number
-  y: number
-}
+// ============================================================
+// Types
+// ============================================================
+export interface HotspotPoint { x: number; y: number }
 
 export interface HotspotComponent {
   code: string
@@ -29,11 +29,33 @@ export interface Kit {
   description: string | null
   image_path: string | null
   hotspots: HotspotComponent[] | null
+  group_id: string | null
   created_at: string
   updated_at: string
 }
 
-export function getImageUrl(path: string | null): string | null {
+export interface Profile {
+  id: string
+  email: string
+  full_name: string | null
+  role: 'admin' | 'user'
+  created_at: string
+  updated_at: string
+}
+
+export interface KitGroup {
+  id: string
+  name: string
+  description: string | null
+  color: string
+  created_at: string
+  updated_at: string
+}
+
+// ============================================================
+// Helpers
+// ============================================================
+export function getImageUrl(path: string | null | undefined): string | null {
   if (!path) return null
   const { data } = supabase.storage.from('kit-images').getPublicUrl(path)
   return data.publicUrl
