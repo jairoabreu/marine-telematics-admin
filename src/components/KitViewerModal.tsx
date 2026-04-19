@@ -55,7 +55,7 @@ export default function KitViewerModal({ kit, onClose }: Props) {
                 className="block flex-shrink-0"
                 onClick={() => setPinnedCode(null)}
               >
-                <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} preserveAspectRatio="none"/>
+                <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} preserveAspectRatio="xMidYMid meet"/>
                 {hotspots.map(comp => {
                   const isActive = comp.code === activeCode
                   const col = comp.color
@@ -94,7 +94,7 @@ export default function KitViewerModal({ kit, onClose }: Props) {
           </div>
 
           <div className="grid grid-cols-[36px_1fr_32px_32px] px-3 py-1.5 border-b border-gray-100 bg-gray-50">
-            {['Cód.','Descrição','Un.','Qtd.'].map((h, i) => (
+            {['CÃ³d.','DescriÃ§Ã£o','Un.','Qtd.'].map((h, i) => (
               <span key={h} className={`text-[9px] font-bold text-gray-400 uppercase tracking-wider ${i >= 2 ? 'text-center' : ''}`}>{h}</span>
             ))}
           </div>
@@ -138,16 +138,16 @@ export default function KitViewerModal({ kit, onClose }: Props) {
               const comp = hotspots.find(c => c.code === activeCode)
               if (!comp) return null
               return <>
-                <div className="text-[9px] font-mono text-white/30 tracking-widest mb-1">// CÓD. {comp.code}</div>
+                <div className="text-[9px] font-mono text-white/30 tracking-widest mb-1">// CÃD. {comp.code}</div>
                 <div className="text-sm font-semibold text-white mb-2 leading-snug">{comp.name}</div>
                 <div className="flex gap-2 mb-2">
                   <div className="bg-white/8 border border-white/10 rounded px-2 py-1 text-[10px] text-white/40">Unid. <b className="text-white font-mono">{comp.unit}</b></div>
                   <div className="bg-white/8 border border-white/10 rounded px-2 py-1 text-[10px] text-white/40">Qtd. <b className="text-white font-mono">{comp.qty}</b></div>
-                  <div className="bg-white/8 border border-white/10 rounded px-2 py-1 text-[10px] text-white/40">Áreas <b className="text-white font-mono">{comp.polys.length}</b></div>
+                  <div className="bg-white/8 border border-white/10 rounded px-2 py-1 text-[10px] text-white/40">Ãreas <b className="text-white font-mono">{comp.polys.length}</b></div>
                 </div>
                 {comp.desc
                   ? <p className="text-[10px] text-white/50 leading-relaxed">{comp.desc}</p>
-                  : <p className="text-[10px] text-white/20 italic">Sem descrição cadastrada.</p>
+                  : <p className="text-[10px] text-white/20 italic">Sem descriÃ§Ã£o cadastrada.</p>
                 }
               </>
             })() : (
