@@ -20,7 +20,7 @@ export default function App() {
   const [loggingIn, setLoggingIn] = useState(false)
 
   const { profile, isAdmin, loading: profileLoading } = useProfile()
-  const { kits, loading, error, reload } = useKits()
+  const { kits, loading, error, refetch } = useKits()
 
   const [groups, setGroups] = useState<KitGroup[]>([])
   const [filterGroupId, setFilterGroupId] = useState<string | null>(null)
@@ -132,10 +132,10 @@ export default function App() {
         </div>
       </div>
 
-      {modal === 'create' && <KitFormModal onClose={() => setModal(null)} onSaved={() => { setModal(null); reload() }}/>}
-      {modal === 'edit' && selected && <KitFormModal kit={selected} onClose={() => setModal(null)} onSaved={() => { setModal(null); reload() }}/>}
+      {modal === 'create' && <KitFormModal onClose={() => setModal(null)} onSaved={() => { setModal(null); refetch() }}/>}
+      {modal === 'edit' && selected && <KitFormModal kit={selected} onClose={() => setModal(null)} onSaved={() => { setModal(null); refetch() }}/>}
       {modal === 'view' && selected && <KitViewerModal kit={selected} onClose={() => setModal(null)}/>}
-      {modal === 'delete' && selected && <DeleteConfirmModal kit={selected} onClose={() => setModal(null)} onDeleted={() => { setModal(null); reload() }}/>}
+      {modal === 'delete' && selected && <DeleteConfirmModal kit={selected} onClose={() => setModal(null)} onDeleted={() => { setModal(null); refetch() }}/>}
       {modal === 'users' && <UsersModal onClose={() => setModal(null)}/>}
       {modal === 'groups' && <GroupsModal onClose={() => setModal(null)} onChange={loadGroups}/>}
     </div>
