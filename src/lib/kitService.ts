@@ -1,42 +1,71 @@
-// src/lib/kitService.ts
 import { supabase, Kit, HotspotComponent } from './supabase'
 
-export async function uploadImage(file: File): Promise<string> {
-  const ext = file.name.split('.').pop()
-  const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const { error } = await supabase.storage.from('kit-images').upload(path, file)
-  if (error) throw new Error(error.message)
-  return path
+export async function fetchKits(): Promise<Kit[]> {
+  const { data, error } = await supabase.from('kits').select('*').order('created_at', { ascending: false })
+  if (error) throw error
+  return (data ?? []) as Kit[]
 }
 
-export async function deleteImage(path: string): Promise<void> {
-  await supabase.storage.from('kit-images').remove([path])
+interface CreateKitInput {
+  name: string
+  description?: string | null
+  imageFile?: File | null
+  hotspots?: HotspotComponent[]
+  group_id?: string | null
 }
 
-export async function createKit(params: { name: string; description: string; imageFile: File | null; hotspots: HotspotComponent[] }): Promise<Kit> {
+export async function createKit(input: CreateKitInput): Promise<Kit> {
   let image_path: string | null = null
-  if (params.imageFile) image_path = await uploadImage(params.imageFile)
-  const { data, error } = await supabase.from('kits').insert({ name: params.name, description: params.description || null, image_path, hotspots: params.hotspots }).select().single()
-  if (error) throw new Error(error.message)
+  if (input.imageFile) {
+    const ext = input.imageFile.name.split('.').pop() ?? 'png'
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`
+    const { error: upErr } = await supabase.storage.from('kit-images').upload(path, input.imageFile)
+    if (upErr) throw upErr
+    image_path = path
+  }
+  const { data, error } = await supabase.from('kits').insert({
+    name: input.name,
+    description: input.description ?? null,
+    image_path,
+    hotspots: input.hotspots ?? [],
+    group_id: input.group_id ?? null,
+  }).select().single()
+  if (error) throw error
   return data as Kit
 }
 
-export async function updateKit(id: string, params: { name?: string; description?: string; imageFile?: File | null; hotspots?: HotspotComponent[]; currentImagePath?: string | null }): Promise<Kit> {
-  const updates: Partial<Kit> = {}
-  if (params.name !== undefined) updates.name = params.name
-  if (params.description !== undefined) updates.description = params.description || null
-  if (params.hotspots !== undefined) updates.hotspots = params.hotspots
-  if (params.imageFile) {
-    if (params.currentImagePath) await deleteImage(params.currentImagePath)
-    updates.image_path = await uploadImage(params.imageFile)
+interface UpdateKitInput {
+  name: string
+  description?: string | null
+  imageFile?: File | null
+  hotspots?: HotspotComponent[]
+  group_id?: string | null
+  currentImagePath?: string | null
+}
+
+export async function updateKit(id: string, input: UpdateKitInput): Promise<Kit> {
+  let image_path = input.currentImagePath ?? null
+  if (input.imageFile) {
+    const ext = input.imageFile.name.split('.').pop() ?? 'png'
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`
+    const { error: upErr } = await supabase.storage.from('kit-images').upload(path, input.imageFile)
+    if (upErr) throw upErr
+    if (input.currentImagePath) await supabase.storage.from('kit-images').remove([input.currentImagePath])
+    image_path = path
   }
-  const { data, error } = await supabase.from('kits').update(updates).eq('id', id).select().single()
-  if (error) throw new Error(error.message)
+  const { data, error } = await supabase.from('kits').update({
+    name: input.name,
+    description: input.description ?? null,
+    image_path,
+    hotspots: input.hotspots ?? [],
+    group_id: input.group_id ?? null,
+  }).eq('id', id).select().single()
+  if (error) throw error
   return data as Kit
 }
 
 export async function deleteKit(kit: Kit): Promise<void> {
-  if (kit.image_path) await deleteImage(kit.image_path)
+  if (kit.image_path) await supabase.storage.from('kit-images').remove([kit.image_path])
   const { error } = await supabase.from('kits').delete().eq('id', kit.id)
-  if (error) throw new Error(error.message)
+  if (error) throw error
 }
