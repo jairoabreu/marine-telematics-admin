@@ -1,4 +1,3 @@
-// src/lib/profileService.ts
 import { supabase, Profile } from './supabase'
 
 export async function fetchProfiles(): Promise<Profile[]> {
@@ -14,6 +13,21 @@ export async function updateProfileRole(id: string, role: 'admin' | 'user'): Pro
 
 export async function updateProfileName(id: string, full_name: string): Promise<void> {
   const { error } = await supabase.from('profiles').update({ full_name }).eq('id', id)
+  if (error) throw error
+}
+
+export async function updateProfile(id: string, patch: { full_name?: string; role?: 'admin' | 'user' }): Promise<void> {
+  const { error } = await supabase.from('profiles').update(patch).eq('id', id)
+  if (error) throw error
+}
+
+/**
+ * Deletes the profile row — this revokes all table access via RLS since is_admin() returns false
+ * and no policy grants read/write to the user anymore.
+ * The auth.users row remains in Supabase (has to be deleted manually in the dashboard for full cleanup).
+ */
+export async function deleteProfile(id: string): Promise<void> {
+  const { error } = await supabase.from('profiles').delete().eq('id', id)
   if (error) throw error
 }
 
